@@ -56,6 +56,56 @@ find_files_paths <- function(path,
 
 }
 
+mac_find_files_paths <- function(path,
+                             pattern,
+                             open_file_connection) {
+
+  if (missing(path) ||
+      missing(pattern) ||
+      missing(open_file_connection)) {
+    close_then_stop("all three arguments are necessary",
+                    open_file_connection)
+  }
+
+  lines <- character()
+
+  files <- dir(path, pattern = pattern)
+
+  number_of_files <- length(files)
+
+  if (number_of_files == 0) return()
+
+  for (file_index in 1:number_of_files) {
+
+    path_to_file <- paste0(path,
+                           "/",
+                           files[file_index])
+
+    elements_of_path <- stringr::str_split(path_to_file,
+                                           "/")
+
+    elements_of_path <- unlist(elements_of_path)
+
+    elements_with_slash <- paste0(elements_of_path,
+                                  "\\")
+
+    collapsed_elements <- paste(elements_with_slash,
+                                collapse = "")
+
+    collapsed_elements <- substr(collapsed_elements,
+                                 start = 1,
+                                 stop = nchar(path_to_file))
+
+    lines <- c(lines, collapsed_elements)
+
+
+
+  }
+
+  lines
+
+}
+
 
 #' Create an EMEGS batchfile for a windows directory system
 #'
