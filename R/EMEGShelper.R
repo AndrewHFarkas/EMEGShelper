@@ -81,24 +81,8 @@ mac_find_files_paths <- function(path,
                            "/",
                            files[file_index])
 
-    elements_of_path <- stringr::str_split(path_to_file,
-                                           "/")
 
-    elements_of_path <- unlist(elements_of_path)
-
-    elements_with_slash <- paste0(elements_of_path,
-                                  "\\")
-
-    collapsed_elements <- paste(elements_with_slash,
-                                collapse = "")
-
-    collapsed_elements <- substr(collapsed_elements,
-                                 start = 1,
-                                 stop = nchar(path_to_file))
-
-    lines <- c(lines, collapsed_elements)
-
-
+    lines <- c(lines, path_to_file)
 
   }
 
@@ -112,7 +96,7 @@ mac_find_files_paths <- function(path,
 #' This function uses r regex patterns to find files and writes
 #' batch text files which EMEGS can read. It is capable of searching
 #' in subfolders. This is for the windows directory system. A mac
-#' version (if finished) is called mac_emegs_batchfile_maker.
+#' version is called mac_emegs_batchfile_maker.
 #'
 #' @param patterns 1 or more patterns to find files
 #' @param batch_path Where the batch text file will be written, must
@@ -132,20 +116,19 @@ windows_emegs_batchfile_maker <- function(patterns,
                                      batch_path,
                                      parent_path,
                                      search_subfolders = F,
-                                     search_only_subfolders = F,
-                                     patterns_exclude) {
+                                     search_only_subfolders = F) {
 
   if (missing('patterns')) stop("specify at least one string pattern to match")
 
-  if (missing('file_name_andor_path')) {
+  if (missing('batch_path')) {
 
     batch_path <- "default_batch.txt"
 
   } else if (!substr(batch_path,
-                     start = nchar(file_name_andor_path) - 3,
-                     stop = nchar(file_name_andor_path)) == '.txt') {
+                     start = nchar(batch_path) - 3,
+                     stop = nchar(batch_path)) == '.txt') {
 
-    stop("You possibly provided a path without a text filename, file_name_and_or_path should end with .txt")
+    stop("You possibly provided a path without a text filename, batch_path should end with .txt")
 
   }
 
@@ -237,20 +220,19 @@ mac_emegs_batchfile_maker <- function(patterns,
                                      batch_path,
                                      parent_path,
                                      search_subfolders = F,
-                                     search_only_subfolders = F,
-                                     patterns_exclude) {
+                                     search_only_subfolders = F) {
 
   if (missing('patterns')) stop("specify at least one string pattern to match")
 
-  if (missing('file_name_andor_path')) {
+  if (missing('batch_path')) {
 
     batch_path <- "default_batch.txt"
 
   } else if (!substr(batch_path,
-                     start = nchar(file_name_andor_path) - 3,
-                     stop = nchar(file_name_andor_path)) == '.txt') {
+                     start = nchar(batch_path) - 3,
+                     stop = nchar(batch_path)) == '.txt') {
 
-    stop("You possibly provided a path without a text filename, file_name_and_or_path should end with .txt")
+    stop("You possibly provided a path without a text filename, batch_path should end with .txt")
 
   }
 
