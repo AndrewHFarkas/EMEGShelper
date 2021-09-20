@@ -57,8 +57,8 @@ find_files_paths <- function(path,
 }
 
 mac_find_files_paths <- function(path,
-                             pattern,
-                             open_file_connection) {
+                                 pattern,
+                                 open_file_connection) {
 
   if (missing(path) ||
       missing(pattern) ||
@@ -113,10 +113,10 @@ mac_find_files_paths <- function(path,
 #'
 #' @export
 windows_emegs_batchfile_maker <- function(patterns,
-                                     batch_path,
-                                     parent_path,
-                                     search_subfolders = F,
-                                     search_only_subfolders = F) {
+                                          batch_path,
+                                          parent_path,
+                                          search_subfolders = F,
+                                          search_only_subfolders = F) {
 
   if (missing('patterns')) stop("specify at least one string pattern to match")
 
@@ -165,7 +165,8 @@ windows_emegs_batchfile_maker <- function(patterns,
 
     if (search_subfolders) {
 
-      dirs <- list.dirs(full.names = F)
+      dirs <- list.dirs(path = parent_path,
+                        full.names = F)
 
       dirs <- tail(dirs, -1)
 
@@ -217,10 +218,10 @@ windows_emegs_batchfile_maker <- function(patterns,
 #'
 #' @export
 mac_emegs_batchfile_maker <- function(patterns,
-                                     batch_path,
-                                     parent_path,
-                                     search_subfolders = F,
-                                     search_only_subfolders = F) {
+                                      batch_path,
+                                      parent_path,
+                                      search_subfolders = F,
+                                      search_only_subfolders = F) {
 
   if (missing('patterns')) stop("specify at least one string pattern to match")
 
@@ -258,8 +259,8 @@ mac_emegs_batchfile_maker <- function(patterns,
     if (!search_only_subfolders) {
 
       lines_to_add <- mac_find_files_paths(parent_path,
-                                       pattern = current_pattern,
-                                       open_file_connection = file_connection)
+                                           pattern = current_pattern,
+                                           open_file_connection = file_connection)
 
       lines <- c(lines, lines_to_add)
 
@@ -269,7 +270,8 @@ mac_emegs_batchfile_maker <- function(patterns,
 
     if (search_subfolders) {
 
-      dirs <- list.dirs(full.names = F)
+      dirs <- list.dirs(path = parent_path,
+                        full.names = F)
 
       dirs <- tail(dirs, -1)
 
@@ -284,8 +286,8 @@ mac_emegs_batchfile_maker <- function(patterns,
                                current_dir)
 
         lines_to_add <- mac_find_files_paths(current_path,
-                                         pattern = current_pattern,
-                                         open_file_connection = file_connection)
+                                             pattern = current_pattern,
+                                             open_file_connection = file_connection)
 
         lines <- c(lines, lines_to_add)
 
@@ -297,5 +299,265 @@ mac_emegs_batchfile_maker <- function(patterns,
   writeLines(lines, file_connection)
   close(file_connection)
 }
+
+#' Read ERP data from one AR file
+#'
+#' This function reads data from one AR file that come from EMEGS.
+#'
+#' @param path_to_ar The path to the AR file
+#' @param extract_channels Choose which channels to extract, must know numeric
+#' index (can be found in Emegs2d)
+#' @param baseline_pts Select baseline points to baseline the channels as they
+#' read in. Ex: c(0:50) which is the first 51 data points
+#' @return Returns a dataframe of the ERP data extracted from an AR file
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#'
+#' @export
+read_ar_file <- function(path_to_ar = NULL,
+                         extract_channels = NULL,
+                         baseline_pts = NULL) {
+
+  reticulate::py_run_string("import numpy as np")
+  reticulate::py_run_string("import array")
+  reticulate::py_run_string("import struct")
+
+  AR_file <<- path_to_ar
+
+  #finish this
+  #grab version number
+  reticulate::py_run_string("version = struct.unpack_from(\">7sh\", open(r.AR_file,\"rb\").read())")
+  reticulate::py_run_string("version_num = version[1]")
+  version_num <- reticulate::py$version_num
+
+  if (version_num == 8) {
+
+    # AR file starts with some information about the file, here we create keys for the information that will be distracted
+    reticulate::py_run_string("keys = \"VStr vNum EegMeg nChan_extra trigPoint dType num_elec data_pts\".split()")
+    # unpack string says unpack a string of 7 characters, followed by a short int followed by 6 float32
+    reticulate::py_run_string("ERP_dict = dict(zip(keys,struct.unpack_from(\">7sh6f\",open(r.AR_file,\"rb\").read())))")
+    # create new string to tell python how many data points there are to extract based on info from the AR file
+    reticulate::py_run_string("avgmat_length_str ='>7sh6f' + str(int(ERP_dict[\"num_elec\"]*ERP_dict[\"data_pts\"])) + 'f'")
+    # read the AR file and extract AR data
+    reticulate::py_run_string("fid = open(r.AR_file,\"rb\").read()")
+    reticulate::py_run_string("all_dat = struct.unpack_from(avgmat_length_str, fid)")
+    reticulate::py_run_string("avg_mat = all_dat[8:]")
+
+    #get number of electrodes
+    reticulate::py_run_string("ar_info = struct.unpack_from(\">7sh6f\", open(r.AR_file,\"rb\").read())")
+    reticulate::py_run_string("electrode_num = ar_info[6]")
+    electrode_num <- reticulate::py$electrode_num
+  }
+
+  if (version_num == 9){
+
+    # AR file starts with some information about the file, here we create keys for the information that will be distracted
+    reticulate::py_run_string("keys = \"VStr vNum EegMeg nChan_extra trigPoint dType unknown_1 unknown_2 num_elec data_pts\".split()")
+    # unpack string says unpack a string of 7 characters, followed by a short int followed by 8 float32
+    reticulate::py_run_string("ERP_dict = dict(zip(keys,struct.unpack_from(\">7sh8f\",open(r.AR_file,\"rb\").read())))")
+    # create new string to tell python how many data points there are to extract based on info from the AR file
+    reticulate::py_run_string("avgmat_length_str ='>7sh8f' + str(int(ERP_dict[\"num_elec\"]*ERP_dict[\"data_pts\"])) + 'f'")
+    # read the AR file and extract AR data
+    reticulate::py_run_string("fid = open(r.AR_file,\"rb\").read()")
+    reticulate::py_run_string("all_dat = struct.unpack_from(avgmat_length_str, fid)")
+    reticulate::py_run_string("avg_mat = all_dat[10:]")
+
+    #get number of electrodes
+    reticulate::py_run_string("ar_info = struct.unpack_from(\">7sh8f\", open(r.AR_file,\"rb\").read())")
+    reticulate::py_run_string("electrode_num = ar_info[8]")
+    electrode_num <- reticulate::py$electrode_num
+
+  }
+  if (!(version_num %in% c(8,9))) {
+    stop("Something went wrong, check that an appropriate AR file is used")
+  }
+
+  avg_mat <- reticulate::py$avg_mat
+
+  avg_mat <- as.data.frame(matrix(unlist(avg_mat), nrow = electrode_num))
+
+  # extract channels
+  if (is.numeric(extract_channels)){
+    avg_mat <- avg_mat[extract_channels,]
+  }
+
+  # baseline channels
+
+  if (is.numeric(baseline_pts)) {
+    baseline_vec <- rowMeans(avg_mat[,c(1:50)])
+    avg_mat <- avg_mat - baseline_vec
+  }
+
+  avg_mat
+
+}
+
+#' Read ERP data from multiple AR files
+#'
+#' This function reads data from AR files that come from EMEGS.
+#'
+#' @param data_folders Specify at least one path to a folder to read AR files from
+#' @param extract_channels Choose which channels to extract, must know numeric
+#' index (can be found in Emegs2d)
+#' @param baseline_pts Select baseline points to baseline the channels as they
+#' read in. Ex: c(0:50) which is the first 51 data points
+#' @param data_folders select multiple data folders to search
+#' @param patterns One or more patterns to find files
+#' @param search_subfolder Logical argument to specify if subfolder should be
+#' searched
+#' @param search_only_subfolders Argument to specify if the files in the parent
+#' folder should not be searched
+#' @return Returns a dataframe of the ERP data extracted from AR files
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#'
+#' @export
+read_ar_files <- function(data_folders = NULL,
+                          extract_channels = NULL,
+                          baseline_pts = NULL,
+                          patterns = NULL,
+                          search_subfolders = F,
+                          search_only_subfolders = F) {
+
+
+  if (is.null(data_folders)) {
+    stop("must give at least one path to a data folder")
+  }
+
+  multiple_ar_files_df <- data.frame()
+
+  file_paths <- character()
+
+  number_of_folders <- length(data_folders)
+
+  for (folder_index in 1:number_of_folders) {
+
+    current_folder <- data_folders[folder_index]
+
+    files_in_current_folder <- character()
+
+    if (!search_only_subfolders) {
+
+      if (is.character(patterns)) {
+
+        number_of_patterns <- length(patterns)
+
+        for (pattern_index in 1:number_of_patterns) {
+
+          current_pattern <- patterns[pattern_index]
+
+          files_in_current_folder <- dir(current_folder,
+                                         pattern = current_pattern)
+
+          current_paths <- paste0(current_folder,
+                                  "/",
+                                  files_in_current_folder)
+
+          file_paths <- c(file_paths,
+                          current_paths)
+
+        }
+
+
+      } else {
+
+        files_in_current_folder <- dir(current_folder)
+
+        current_paths <- paste0(current_folder,
+                                "/",
+                                files_in_current_folder)
+
+        file_paths <- c(file_paths,
+                        current_paths)
+      }
+
+      if (search_subfolders) {
+
+        dirs <- list.dirs(path = current_folder,
+                          full.names = F)
+
+        dirs <- tail(dirs, -1)
+
+        number_of_dirs <- length(dirs)
+
+        for (dir_index in 1:number_of_dirs) {
+
+          files_in_current_subfolder <- character()
+
+          current_dir <- dirs[dir_index]
+
+          current_subfolder <- paste0(current_folder,
+                                      "/",
+                                      current_dir)
+
+          if (is.character(patterns)) {
+
+            number_of_patterns <- length(patterns)
+
+            for (pattern_index in 1:number_of_patterns) {
+
+              current_pattern <- patterns[pattern_index]
+
+              files_in_current_subfolder <- dir(current_subfolder,
+                                                pattern = current_pattern)
+
+              current_paths <- paste0(current_subfolder,
+                                      "/",
+                                      files_in_current_subfolder)
+
+              file_paths <- c(file_paths,
+                              current_paths)
+
+            }
+
+
+          } else {
+
+            files_in_current_subfolder <- dir(current_subfolder)
+
+            current_paths <- paste0(current_subfolder,
+                                    "/",
+                                    files_in_current_subfolder)
+
+            file_paths <- c(file_paths,
+                            current_paths)
+          }
+        }
+      }
+    }
+  }
+
+  number_of_paths <- length(file_paths)
+
+  for (path_index in 1:number_of_paths) {
+
+    current_path <- file_paths[path_index]
+
+    current_df <- read_ar_file(path_to_ar = current_path,
+                 extract_channels = extract_channels,
+                 baseline_pts = baseline_pts)
+
+    # add channel number to current_df
+
+    current_df <- cbind.data.frame(extract_channels, current_df)
+
+    # add path name to current_df
+
+    current_path_repeated <- rep(current_path, dim(current_df)[1])
+
+    current_path_repeated <- as.data.frame(current_path_repeated)
+
+    current_df <- cbind.data.frame(current_path_repeated, current_df)
+
+    multiple_ar_files_df <- rbind.data.frame(multiple_ar_files_df, current_df)
+
+  }
+
+  multiple_ar_files_df
+
+}
+
+
+
 
 
