@@ -539,7 +539,13 @@ read_ar_files <- function(data_folders = NULL,
 
     # add channel number to current_df
 
-    current_df <- cbind.data.frame(extract_channels, current_df)
+    if (is.numeric(extract_channels)) {
+      current_df <- cbind.data.frame(extract_channels, current_df)
+    } else {
+      channels <- 1:dim(current_df)[1]
+      current_df <- cbind.data.frame(channels, current_df)
+    }
+
 
     # add path name to current_df
 
