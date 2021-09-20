@@ -384,7 +384,7 @@ read_ar_file <- function(path_to_ar = NULL,
   # baseline channels
 
   if (is.numeric(baseline_pts)) {
-    baseline_vec <- rowMeans(avg_mat[,c(1:50)])
+    baseline_vec <- rowMeans(avg_mat[, baseline_pts])
     avg_mat <- avg_mat - baseline_vec
   }
 
