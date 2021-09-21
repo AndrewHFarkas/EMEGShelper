@@ -563,7 +563,18 @@ read_ar_files <- function(data_folders = NULL,
 
 }
 
-
+# make this data and save it in package in R/data.R
+#' Channel names and numbers for the biosemi 64 channel cap
+#'
+#' This small data frame can help to show the name for each channel number.
+#'
+#' @format A data frame with 64 rows and 2 variables:
+#' \describe{
+#'   \item{channel_number}{channel number used in EMEGS and read from AR file}
+#'   \item{channel_name}{actual channel name}
+#'   ...
+#' }
+"biosemi64_channel_numbers_names"
 
 
 
