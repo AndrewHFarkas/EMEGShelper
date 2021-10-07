@@ -6,15 +6,26 @@
 \usage{
 read_ar_files(
   data_folders = NULL,
-  extract_channels = NULL,
-  baseline_pts = NULL,
   patterns = NULL,
   search_subfolders = F,
-  search_only_subfolders = F
+  search_only_subfolders = F,
+  extract_channels = NULL,
+  baseline_pts = NULL,
+  select_time_points = NULL,
+  average_timepoints = F,
+  average_channels = F,
+  include_channel_name = F,
+  include_path_name = F,
+  include_file_name = F
 )
 }
 \arguments{
 \item{data_folders}{select multiple data folders to search}
+
+\item{patterns}{One or more patterns to find files}
+
+\item{search_only_subfolders}{Argument to specify if the files in the parent
+folder should not be searched}
 
 \item{extract_channels}{Choose which channels to extract, must know numeric
 index (can be found in Emegs2d)}
@@ -22,10 +33,18 @@ index (can be found in Emegs2d)}
 \item{baseline_pts}{Select baseline points to baseline the channels as they
 read in. Ex: c(0:50) which is the first 51 data points}
 
-\item{patterns}{One or more patterns to find files}
+\item{select_time_points}{Select time points to keep. Works after baselining. You select sample
+points not in millisecond. You will need to know your samplerate and scene onset}
 
-\item{search_only_subfolders}{Argument to specify if the files in the parent
-folder should not be searched}
+\item{average_timepoints}{Logical argument if selected time points should be averaged}
+
+\item{average_channels}{Logical argument to average selected channels together}
+
+\item{include_channel_name}{Logical argument for whether to put channel names in output dataframe}
+
+\item{include_path_name}{Logical argument for whether to put path name in output dataframe}
+
+\item{include_file_name}{Logical argument for whether to put file name in output dataframe}
 
 \item{search_subfolder}{Logical argument to specify if subfolder should be
 searched}

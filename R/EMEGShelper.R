@@ -309,6 +309,13 @@ mac_emegs_batchfile_maker <- function(patterns,
 #' index (can be found in Emegs2d)
 #' @param baseline_pts Select baseline points to baseline the channels as they
 #' read in. Ex: c(0:50) which is the first 51 data points
+#' @param select_time_points Select time points to keep. Works after baselining. You select sample
+#' points not in millisecond. You will need to know your samplerate and scene onset
+#' @param average_timepoints Logical argument if selected time points should be averaged
+#' @param average_channels Logical argument to average selected channels together
+#' @param include_channel_name Logical argument for whether to put channel names in output dataframe
+#' @param include_path_name Logical argument for whether to put path name in output dataframe
+#' @param include_file_name Logical argument for whether to put file name in output dataframe
 #' @return Returns a dataframe of the ERP data extracted from an AR file
 #'
 #' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
@@ -316,7 +323,13 @@ mac_emegs_batchfile_maker <- function(patterns,
 #' @export
 read_ar_file <- function(path_to_ar = NULL,
                          extract_channels = NULL,
-                         baseline_pts = NULL) {
+                         baseline_pts = NULL,
+                         select_time_points = NULL,
+                         average_timepoints = F,
+                         average_channels = F,
+                         include_channel_name = F,
+                         include_path_name = F,
+                         include_file_name = F) {
 
   reticulate::py_run_string("import numpy as np")
   reticulate::py_run_string("import array")
@@ -388,6 +401,78 @@ read_ar_file <- function(path_to_ar = NULL,
     avg_mat <- avg_mat - baseline_vec
   }
 
+  # select timepoints
+
+  if (!is.null(select_time_points)) {
+
+    avg_mat <- avg_mat[, select_time_points]
+
+  }
+
+  #average time points
+
+  if(average_timepoints){
+
+    avg_mat <- rowMeans(avg_mat)
+
+  }
+
+  # average channels
+
+  if (average_channels) {
+
+    avg_mat <- t(data.frame("avg_of_channels" = colMeans(avg_mat)))
+
+  }
+
+  #include channel name
+
+  if(include_channel_name){
+
+    if (is.null(extract_channels)) {
+
+      extract_channels <- 1:nrow(avg_mat)
+
+    }
+
+    avg_mat <- cbind.data.frame(extract_channels, avg_mat)
+
+    colnames(avg_mat)[1] <- "channel_names"
+
+  }
+
+  # include path name
+
+  if(include_path_name){
+
+    rep_path_name  <- rep(path_to_ar, nrow(avg_mat))
+
+    avg_mat <- cbind.data.frame(rep_path_name, avg_mat)
+
+    colnames(avg_mat)[1] <- "path_name"
+
+  }
+
+
+  # include_file_name
+
+  if(include_file_name) {
+
+
+    file_name <- basename(path_to_ar)
+
+
+
+    rep_file_name  <- rep(file_name, nrow(avg_mat))
+
+    avg_mat <- cbind.data.frame(rep_file_name, avg_mat)
+
+    colnames(avg_mat)[1] <- "file_name"
+
+
+
+  }
+
   avg_mat
 
 }
@@ -396,28 +481,40 @@ read_ar_file <- function(path_to_ar = NULL,
 #'
 #' This function reads data from AR files that come from EMEGS.
 #'
-#' @param data_folders Specify at least one path to a folder to read AR files from
-#' @param extract_channels Choose which channels to extract, must know numeric
-#' index (can be found in Emegs2d)
-#' @param baseline_pts Select baseline points to baseline the channels as they
-#' read in. Ex: c(0:50) which is the first 51 data points
 #' @param data_folders select multiple data folders to search
 #' @param patterns One or more patterns to find files
 #' @param search_subfolder Logical argument to specify if subfolder should be
 #' searched
 #' @param search_only_subfolders Argument to specify if the files in the parent
 #' folder should not be searched
+#' @param extract_channels Choose which channels to extract, must know numeric
+#' index (can be found in Emegs2d)
+#' @param baseline_pts Select baseline points to baseline the channels as they
+#' read in. Ex: c(0:50) which is the first 51 data points
+#' @param select_time_points Select time points to keep. Works after baselining. You select sample
+#' points not in millisecond. You will need to know your samplerate and scene onset
+#' @param average_timepoints Logical argument if selected time points should be averaged
+#' @param average_channels Logical argument to average selected channels together
+#' @param include_channel_name Logical argument for whether to put channel names in output dataframe
+#' @param include_path_name Logical argument for whether to put path name in output dataframe
+#' @param include_file_name Logical argument for whether to put file name in output dataframe
 #' @return Returns a dataframe of the ERP data extracted from AR files
 #'
 #' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
 #'
 #' @export
 read_ar_files <- function(data_folders = NULL,
-                          extract_channels = NULL,
-                          baseline_pts = NULL,
                           patterns = NULL,
                           search_subfolders = F,
-                          search_only_subfolders = F) {
+                          search_only_subfolders = F,
+                          extract_channels = NULL,
+                          baseline_pts = NULL,
+                          select_time_points = NULL,
+                          average_timepoints = F,
+                          average_channels = F,
+                          include_channel_name = F,
+                          include_path_name = F,
+                          include_file_name = F) {
 
 
   if (is.null(data_folders)) {
@@ -527,6 +624,7 @@ read_ar_files <- function(data_folders = NULL,
     }
   }
 
+
   number_of_paths <- length(file_paths)
 
   for (path_index in 1:number_of_paths) {
@@ -534,26 +632,15 @@ read_ar_files <- function(data_folders = NULL,
     current_path <- file_paths[path_index]
 
     current_df <- read_ar_file(path_to_ar = current_path,
-                 extract_channels = extract_channels,
-                 baseline_pts = baseline_pts)
+                               extract_channels = extract_channels,
+                               baseline_pts = baseline_pts,
+                               select_time_points = select_time_points,
+                               average_timepoints = average_timepoints,
+                               average_channels = average_channels,
+                               include_channel_name = include_channel_name,
+                               include_path_name = include_path_name,
+                               include_file_name = include_file_name)
 
-    # add channel number to current_df
-
-    if (is.numeric(extract_channels)) {
-      current_df <- cbind.data.frame(extract_channels, current_df)
-    } else {
-      channels <- 1:dim(current_df)[1]
-      current_df <- cbind.data.frame(channels, current_df)
-    }
-
-
-    # add path name to current_df
-
-    current_path_repeated <- rep(current_path, dim(current_df)[1])
-
-    current_path_repeated <- as.data.frame(current_path_repeated)
-
-    current_df <- cbind.data.frame(current_path_repeated, current_df)
 
     multiple_ar_files_df <- rbind.data.frame(multiple_ar_files_df, current_df)
 
