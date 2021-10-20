@@ -664,4 +664,102 @@ read_ar_files <- function(data_folders = NULL,
 "biosemi64_channel_numbers_names"
 
 
+#' Make changes to ctf MEG marker file and save the original
+#'
+#' This function saves original marker files used in ctf MEG files (.ds files)
+#' new folder called original_marker_files in the parent folder. It then will
+#' alter one present in the folder such that triggers can be removed or adjusted.
+#'
+#' @param folders select at least one or more data folders to search for marker files
+#' @param target_triggers at least one or more target triggers
+#' @param delete_trigger_numbers numeric vector of which triggers should be removed
+#' from marker file
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#'
+#' @export
+marker_file_editor <- function(folders = NULL,
+                               target_triggers = NULL,
+                               delete_trigger_numbers = NULL) {
 
+
+  if (!is.character(folders) |
+      !is.character(target_triggers) |
+      !is.numeric(delete_trigger_numbers)) {
+
+    stop()
+
+  }
+  if (!(delete_trigger_numbers > 0)) {
+
+    stop()
+
+  }
+
+  # get paths to all marker files
+
+  file_paths <- character()
+
+  for (folder_index in 1:length(folders)) {
+
+    current_folder_path <- folders[folder_index]
+
+    meg_folder <- dir(current_folder_path, pattern = ".ds")
+
+    meg_folder_path <- file.path(current_folder_path, meg_folder)
+
+    current_file_path <- file.path(meg_folder_path,
+                                   "MarkerFile.mrk")
+
+    path_to_folder_of_original <- file.path(current_folder_path,
+                                            "original_markerfile")
+
+    if (!file.exists(path_to_folder_of_original)) {
+
+      dir.create(path = path_to_folder_of_original)
+
+      file.copy(current_file_path, path_to_folder_of_original)
+
+    }
+
+    file_paths <- c(file_paths, current_file_path)
+
+  }
+
+  # maybe search sub folders
+
+  for (path_index in 1:length(file_paths)) {
+
+    current_marker <- file_paths[path_index]
+
+    marker_lines <- readLines(con = current_marker)
+
+    new_marker_lines <- marker_lines
+
+    for (trigger_index in 1:length(target_triggers)) {
+
+      current_trigger <- target_triggers[trigger_index]
+
+      number_of_samples_row <- which(marker_lines == current_trigger) +10
+
+      first_trial_marker <- which(marker_lines == current_trigger) +13
+
+      number_of_triggers_to_remove <- length(delete_trigger_numbers)
+
+      new_number_of_triggers <- as.numeric(marker_lines[number_of_samples_row]) -
+        number_of_triggers_to_remove
+
+      new_marker_lines[number_of_samples_row] <- as.character(new_number_of_triggers)
+
+      trigger_rows_to_remove <- first_trial_marker + delete_trigger_numbers -1
+
+      new_marker_lines <- new_marker_lines[-trigger_rows_to_remove]
+
+      writeLines(text = new_marker_lines, con = current_marker)
+
+    }
+
+
+  }
+
+}
