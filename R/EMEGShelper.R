@@ -337,7 +337,6 @@ read_ar_file <- function(path_to_ar = NULL,
 
   AR_file <<- path_to_ar
 
-  #finish this
   #grab version number
   reticulate::py_run_string("version = struct.unpack_from(\">7sh\", open(r.AR_file,\"rb\").read())")
   reticulate::py_run_string("version_num = version[1]")
@@ -763,3 +762,116 @@ marker_file_editor <- function(folders = NULL,
   }
 
 }
+
+
+#' Overwrites the data of an AR/AT file to plot PCA weights
+#'
+#' This function will overwrite an AR/AT file with the weights of a PCA. It is probably
+#' better to overwrite Grand Mean file instead of an individual subject AR/AT file.
+#'
+#' @param file_to_overwrite file to overwrite the observed values for
+#' @param pca_weight_vec a vector of the PCA weights
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#'
+#' @export
+pca_weights_to_file <- function(file_to_overwrite = NULL,
+                                pca_weight_vec = NULL,
+                                write_path = NULL) {
+
+  # copy file to new location with new name, probably delete later if I create
+  # file lower
+
+  file.copy(from = file_to_overwrite,
+            to = write_path,
+            overwrite = F)
+
+  # extract data from original file
+
+  reticulate::py_run_string("import numpy as np")
+  reticulate::py_run_string("import array")
+  reticulate::py_run_string("import struct")
+
+  AR_file <<- file_to_overwrite
+
+  #grab version number
+  reticulate::py_run_string("version = struct.unpack_from(\">7sh\", open(r.AR_file,\"rb\").read())")
+  reticulate::py_run_string("version_num = version[1]")
+  version_num <- reticulate::py$version_num
+
+  if (version_num == 8) {
+
+    # AR file starts with some information about the file, here we create keys for the information that will be distracted
+    reticulate::py_run_string("keys = \"VStr vNum EegMeg nChan_extra trigPoint dType num_elec data_pts\".split()")
+    # unpack string says unpack a string of 7 characters, followed by a short int followed by 6 float32
+    reticulate::py_run_string("ERP_dict = dict(zip(keys,struct.unpack_from(\">7sh6f\",open(r.AR_file,\"rb\").read())))")
+    # create new string to tell python how many data points there are to extract based on info from the AR file
+    reticulate::py_run_string("avgmat_length_str ='>7sh6f' + str(int(ERP_dict[\"num_elec\"]*ERP_dict[\"data_pts\"])) + 'f'")
+    # read the AR file and extract AR data
+    reticulate::py_run_string("fid = open(r.AR_file,\"rb\").read()")
+    reticulate::py_run_string("all_dat = struct.unpack_from(avgmat_length_str, fid)")
+    reticulate::py_run_string("avg_mat = all_dat[8:]")
+
+    #get number of electrodes
+    reticulate::py_run_string("ar_info = struct.unpack_from(\">7sh6f\", open(r.AR_file,\"rb\").read())")
+    reticulate::py_run_string("electrode_num = ar_info[6]")
+    electrode_num <- reticulate::py$electrode_num
+  }
+
+  if (version_num == 9){
+
+    # AR file starts with some information about the file, here we create keys for the information that will be distracted
+    reticulate::py_run_string("keys = \"VStr vNum EegMeg nChan_extra trigPoint dType unknown_1 unknown_2 num_elec data_pts\".split()")
+    # unpack string says unpack a string of 7 characters, followed by a short int followed by 8 float32
+    reticulate::py_run_string("ERP_dict = dict(zip(keys,struct.unpack_from(\">7sh8f\",open(r.AR_file,\"rb\").read())))")
+    # create new string to tell python how many data points there are to extract based on info from the AR file
+    reticulate::py_run_string("avgmat_length_str ='>7sh8f' + str(int(ERP_dict[\"num_elec\"]*ERP_dict[\"data_pts\"])) + 'f'")
+    # read the AR file and extract AR data
+    reticulate::py_run_string("fid = open(r.AR_file,\"rb\").read()")
+    reticulate::py_run_string("all_dat = struct.unpack_from(avgmat_length_str, fid)")
+    reticulate::py_run_string("avg_mat = all_dat[10:]")
+
+    #get number of electrodes
+    reticulate::py_run_string("ar_info = struct.unpack_from(\">7sh8f\", open(r.AR_file,\"rb\").read())")
+    reticulate::py_run_string("electrode_num = ar_info[8]")
+    electrode_num <- reticulate::py$electrode_num
+
+  }
+  if (!(version_num %in% c(8,9))) {
+    stop("Something went wrong, check that an appropriate AR file is used")
+  }
+
+  avg_mat <- reticulate::py$avg_mat
+
+  avg_mat <- as.data.frame(matrix(unlist(avg_mat), nrow = electrode_num))
+
+  # overwrite data with PCA weights
+
+  repeated_pca_weights <- rep(pca_weight_vec, py$ERP_dict["data_pts"])
+
+  repeated_pca_weights_list <- list()
+
+  repeated_pca_weights_list[1:length(repeated_pca_weights)] <- repeated_pca_weights
+
+  py$avg_mat <- repeated_pca_weights_list
+
+  # write data into file copy
+  if (version_num == 8) {
+    reticulate::py_run_string("struct.pack(\">7sh6f\", *ar_info) + struct.pack(str(int(ERP_dict[\"num_elec\"]*ERP_dict[\"data_pts\"])) + 'f', *avg_mat)")
+
+  }
+
+  if (version_num == 9){
+    reticulate::py_run_string("struct.pack(\">7sh8f\", *ar_info) + struct.pack(str(int(ERP_dict[\"num_elec\"]*ERP_dict[\"data_pts\"])) + 'f', *avg_mat)")
+
+
+
+  }
+
+}
+
+#for testing
+file_to_overwrite <- '/run/media/andrewf/USB DISK/temp_data_to_share/emegs test/just_at/EX009_2.f.at1.ar'
+pca_weight_vec <- 1:64
+write_path <- '/run/media/andrewf/USB DISK/temp_data_to_share/emegs test/just_at/test.at1.ar'
+
