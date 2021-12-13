@@ -779,8 +779,6 @@ marker_file_editor <- function(folders = NULL,
 #' @export
 get_original_markers <- function(folders = NULL) {
 
-  browser()
-
   for (folder_index in 1:length(folders)) {
 
     current_folder_path <- folders[folder_index]
