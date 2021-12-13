@@ -768,3 +768,46 @@ marker_file_editor <- function(folders = NULL,
 
 }
 
+#' Replaces marker file with the original
+#'
+#' This function replaced the edited marker file with the original
+#'
+#' @param folders select at least one or more data folders to search for marker files
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#'
+#' @export
+get_original_markers <- function(folders = NULL) {
+
+  browser()
+
+  for (folder_index in 1:length(folders)) {
+
+    current_folder_path <- folders[folder_index]
+
+    meg_folder <- dir(current_folder_path, pattern = ".ds")
+
+    meg_folder_path <- file.path(current_folder_path, meg_folder)
+
+    current_file_path <- file.path(meg_folder_path,
+                                   "MarkerFile.mrk")
+
+    path_to_folder_of_original <- file.path(current_folder_path,
+                                            "original_markerfile")
+
+    path_to_original_marker_file <- file.path(current_folder_path,
+                                              "original_markerfile",
+                                              "MarkerFile.mrk")
+
+    if (!file.exists(path_to_original_marker_file)) {
+      next
+    }
+
+    file.copy(path_to_original_marker_file,
+              current_file_path,
+              overwrite = T)
+
+  }
+
+}
+
