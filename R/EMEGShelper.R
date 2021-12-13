@@ -715,7 +715,7 @@ marker_file_editor <- function(folders = NULL,
                                             "original_markerfile")
 
     if (file.exists(path_to_folder_of_original) && skip_already_edited) {
-      break
+      next
     }
 
     if (!file.exists(path_to_folder_of_original)) {
