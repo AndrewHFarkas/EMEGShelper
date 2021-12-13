@@ -7,7 +7,8 @@
 marker_file_editor(
   folders = NULL,
   target_triggers = NULL,
-  delete_trigger_numbers = NULL
+  delete_trigger_numbers = NULL,
+  skip_already_edited = T
 )
 }
 \arguments{
