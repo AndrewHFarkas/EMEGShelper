@@ -654,10 +654,11 @@ read_ar_files <- function(data_folders = NULL,
 #'
 #' This small data frame can help to show the name for each channel number.
 #'
-#' @format A data frame with 65 rows and 2 variables:
+#' @format A data frame with 65 rows and 3 variables:
 #' \describe{
 #'   \item{channel_number}{channel number used in EMEGS and read from AR file}
 #'   \item{channel_name}{actual channel name}
+#'   \item{channel_name_uppercase}{channel name but all letters are uppercase}
 #'   ...
 #' }
 "biosemi64_channel_numbers_names"
@@ -809,3 +810,18 @@ get_original_markers <- function(folders = NULL) {
 
 }
 
+#' Turns Cartesian coordinates into EMEGS EPosSphere positions
+#'
+#' This function takes Cartesian coordinates and turns them into EPosSphere positions.
+#' Finding these positions are necessary for creating ecfg configuration files for EMEGS
+#' such that the software knows its three dimensional location on a sphere.
+#'
+#' @param folders select at least one or more data folders to search for marker files
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#'
+#' @export
+
+name <- function(variables) {
+
+}
