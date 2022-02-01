@@ -845,7 +845,7 @@ deg2rad <- function(degrees) {(degrees * pi) / (180)}
 #' @export
 cart2theta_radians <- function(z_coor) {
 
-  if ((-1 > z_coor | z_coor > 1)) {
+  if ((-1 > z_coor || z_coor > 1)) {
     stop("z_coor needs to be between -1 to 1")
   }
 
@@ -932,11 +932,11 @@ cart2phi_degrees <- function(x_coor, y_coor) {
 
 cart_coor_check <- function(x_coor, y_coor, z_coor) {
 
-  if (-1 > x_coor | -1 > y_coor | -1 >  z_coor) {
+  if (-1 > x_coor || -1 > y_coor || -1 >  z_coor) {
     stop("each coordinate has to be within -1 and 1")
   }
 
-  if (1 < x_coor | 1 < y_coor | 1 <  z_coor) {
+  if (1 < x_coor || 1 < y_coor || 1 <  z_coor) {
     stop("each coordinate has to be within -1 and 1")
   }
 
@@ -1000,11 +1000,11 @@ cart2polar <- function(x_coor, y_coor, z_coor) {
 #' @export
 polar2cart <- function(theta_radians, phi_radians) {
 
-  if (theta_radians < 0 | theta_radians > pi) {
+  if (theta_radians < 0 || theta_radians > pi) {
     stop("theta_radians has to be within 0 and pi")
   }
 
-  if (phi_radians < 0 | phi_radians > (2*pi)) {
+  if (phi_radians < 0 || phi_radians > (2*pi)) {
     stop("phi_radians has to be within 0 and 2*pi")
   }
 
