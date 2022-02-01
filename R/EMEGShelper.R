@@ -1,3 +1,4 @@
+
 close_then_stop <- function(error_message, open_file_connection) {
 
   close(open_file_connection)
@@ -980,4 +981,45 @@ cart2polar <- function(x_coor, y_coor, z_coor) {
                       phi_radians,   phi_degrees)
 
   polar_coor_vec
+}
+
+#' Turns polar coordinates (EPosSphere) into Cartesian coordinates
+#'
+#' This function takes polar coordinates (EPosSphere in EMEGS) and turns them into
+#' Cartesian 3d coordinates. Assumes radius of one, X is right ear (negative) to left ear (positive),
+#' Y positive toward nose, and Z is 1 at Cz. Spherical coordinates are returned in radians
+#' and degrees. Theta is 0 at Cz pi at other pole. Phi is zero at right ear, pi/2 (90°) at
+#' nose, pi (180°) at left ear, 3/2*pi (270°) at Oz.
+#'
+#' @param theta_radians angle in radians from north pole Cz
+#' @param phi_radians angle in radians from right ear to nose
+#' @return Returns a named vector with X, Y, and Z coordinates
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
+#'
+#' @export
+polar2cart <- function(theta_radians, phi_radians) {
+
+  if (theta_radians < 0 | theta_radians > pi) {
+    stop("theta_radians has to be within 0 and pi")
+  }
+
+  if (phi_radians < 0 | phi_radians > (2*pi)) {
+    stop("phi_radians has to be within 0 and 2*pi")
+  }
+
+
+  z_coor = cos(theta_radians)
+
+  y_coor = sin(theta_radians) * sin(phi_radians)
+
+  x_coor = sin(theta_radians) * cos(phi_radians)
+
+  cart_coor_check(x_coor, y_coor, z_coor)
+
+  cart_coors <- c(x_coor, y_coor, z_coor)
+
+  names(cart_coors) <- c("X", "Y", "Z")
+
+  cart_coors
 }
