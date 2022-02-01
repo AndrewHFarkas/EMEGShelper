@@ -894,11 +894,9 @@ cart2phi_radians <- function(x_coor, y_coor) {
 
   phi_radians <- atan2(y_coor, -x_coor)
 
-  if (phi_radians < 0) {
+  negative_phi <- phi_radians < 0
 
-    phi_radians <- abs((2*pi) + phi_radians)
-
-  }
+  phi_radians[negative_phi] <- abs((2*pi) + phi_radians)
 
   names(phi_radians) <- "phi_radians"
 
