@@ -896,7 +896,7 @@ cart2phi_radians <- function(x_coor, y_coor) {
 
   negative_phi <- phi_radians < 0
 
-  phi_radians[negative_phi] <- abs((2*pi) + phi_radians)
+  phi_radians[negative_phi] <- abs((2*pi) + phi_radians[negative_phi])
 
   names(phi_radians) <- "phi_radians"
 
@@ -938,11 +938,11 @@ cart_coor_check <- function(x_coor, y_coor, z_coor) {
     stop("each coordinate has to be within -1 and 1")
   }
 
-  if (((x_coor^2) + (y_coor^2) + (z_coor^2)) > 1.001) {
+  if (any(((x_coor^2) + (y_coor^2) + (z_coor^2)) > 1.001)) {
     stop("cartesian coordinate is outside of a sphere with a radius of 1")
   }
 
-  if (((x_coor^2) + (y_coor^2) + (z_coor^2)) < .95) {
+  if (any(((x_coor^2) + (y_coor^2) + (z_coor^2)) < .95)) {
     warning("cartesian coordinate is likely not on the sphere")
   }
 
@@ -1011,7 +1011,7 @@ polar2cart <- function(theta_radians, phi_radians) {
 
   y_coor = sin(theta_radians) * sin(phi_radians)
 
-  x_coor = sin(theta_radians) * cos(phi_radians)
+  x_coor = -(sin(theta_radians) * cos(phi_radians))
 
   cart_coor_check(x_coor, y_coor, z_coor)
 
