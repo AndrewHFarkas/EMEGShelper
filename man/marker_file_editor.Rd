@@ -25,5 +25,5 @@ new folder called original_marker_files in the parent folder. It then will
 alter one present in the folder such that triggers can be removed or adjusted.
 }
 \author{
-Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 }

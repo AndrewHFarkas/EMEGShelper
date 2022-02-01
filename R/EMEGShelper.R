@@ -833,7 +833,7 @@ deg2rad <- function(degrees) {(degrees * pi) / (180)}
 
 #' Finds theta in radians with a Z coordinate
 #'
-#' Takes cartesian Z coordinate and returns theta angles in radians which is 0
+#' Takes Cartesian Z coordinate and returns theta angle in radians which is 0
 #' at Cz which is a Z coordinate of 1
 #'
 #'
@@ -857,7 +857,7 @@ cart2theta_radians <- function(z_coor) {
 
 #' Finds theta in degrees with a Z coordinate
 #'
-#' Takes cartesian Z coordinate and returns theta angles in degrees which is 0
+#' Takes Cartesian Z coordinate and returns theta angle in degrees which is 0
 #' at Cz which is a Z coordinate of 1
 #'
 #'
@@ -877,17 +877,57 @@ cart2theta_degrees <- function(z_coor){
   theta_degrees
 }
 
-cart2phi_radians
+#' Finds phi in radians with a X and Y coordinates
+#'
+#' Takes Cartesian X and Y coordinates and returns phi angle in radians which is 0
+#' at the right ear or an X at -1 and Y at 0.
+#'
+#'
+#' @param x_coor x coordinate between -1 and 1
+#' @param y_coor y coordinate between -1 and 1
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
+#'
+#' @export
+cart2phi_radians <- function(x_coor, y_coor) {
 
-phi_radians   <- atan2(y_coor, -x_coor)
+  phi_radians <- atan2(y_coor, -x_coor)
 
-if (phi_radians < 0) {
+  if (phi_radians < 0) {
 
-  phi_radians <- abs((2*pi) + phi_radians)
+    phi_radians <- abs((2*pi) + phi_radians)
+
+  }
+
+  names(phi_radians) <- "phi_radians"
+
+  phi_radians
 
 }
 
-cart2phi_degrees
+
+#' Finds phi in degrees with a X and Y coordinates
+#'
+#' Takes Cartesian X and Y coordinates and returns phi angle in degrees which is 0
+#' at the right ear or an X at -1 and Y at 0.
+#'
+#'
+#' @param x_coor x coordinate between -1 and 1
+#' @param y_coor y coordinate between -1 and 1
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
+#'
+#' @export
+cart2phi_degrees <- function(x_coor, y_coor) {
+
+  phi_radians <- cart2phi_radians(x_coor, y_coor)
+
+  phi_degrees <- rad2deg(phi_radians)
+
+  names(phi_degrees) <- "phi_degrees"
+
+  phi_degrees
+}
 
 cart_coor_check <- function(x_coor, y_coor, z_coor) {
 
@@ -899,7 +939,7 @@ cart_coor_check <- function(x_coor, y_coor, z_coor) {
     stop("each coordinate has to be within -1 and 1")
   }
 
-  if (((x_coor^2) + (y_coor^2) + (z_coor^2)) > 1) {
+  if (((x_coor^2) + (y_coor^2) + (z_coor^2)) > 1.001) {
     stop("cartesian coordinate is outside of a sphere with a radius of 1")
   }
 
@@ -931,24 +971,13 @@ cart2polar <- function(x_coor, y_coor, z_coor) {
 
   cart_coor_check(x_coor, y_coor, z_coor)
 
-  theta_radians <- cart2theta_radians(z_coor)
-  theta_degrees <- rad2deg(theta_radians)
+  theta_radians  <- cart2theta_radians(z_coor)
+  theta_degrees  <- cart2theta_degrees(z_coor)
+  phi_radians    <- cart2phi_radians(x_coor, y_coor)
+  phi_degrees    <- cart2phi_degrees(x_coor, y_coor)
 
-  phi_radians   <- atan2(y_coor, -x_coor)
-
-  if (phi_radians < 0) {
-
-    phi_radians <- abs((2*pi) + phi_radians)
-
-  }
-
-  phi_degrees <- rad2deg(phi_radians)
-
-  polar_coor_vec        <- c( theta_radians,   theta_degrees,
-                              phi_radians,     phi_degrees)
-
-  names(polar_coor_vec) <- c("theta_radians", "theta_degrees",
-                             "phi_radians",   "phi_degrees")
+  polar_coor_vec <- c(theta_radians, theta_degrees,
+                      phi_radians,   phi_degrees)
 
   polar_coor_vec
 }

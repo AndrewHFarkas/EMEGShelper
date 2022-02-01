@@ -13,5 +13,5 @@ get_original_markers(folders = NULL)
 This function replaced the edited marker file with the original
 }
 \author{
-Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 }

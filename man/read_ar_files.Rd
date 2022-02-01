@@ -56,5 +56,5 @@ Returns a dataframe of the ERP data extracted from AR files
 This function reads data from AR files that come from EMEGS.
 }
 \author{
-Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 }

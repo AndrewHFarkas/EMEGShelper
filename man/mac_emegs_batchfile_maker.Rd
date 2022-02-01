@@ -38,5 +38,5 @@ in subfolders. This is for the mac directory system. A windows
 version is called mac_emegs_batchfile_maker.
 }
 \author{
-Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 }
