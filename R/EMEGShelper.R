@@ -109,7 +109,7 @@ mac_find_files_paths <- function(path,
 #' @param patterns_exclude not currently in use
 #' @return writes a batch text file in batch_path
 #'
-#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 #'
 #' @export
 windows_emegs_batchfile_maker <- function(patterns,
@@ -214,7 +214,7 @@ windows_emegs_batchfile_maker <- function(patterns,
 #' @param patterns_exclude not currently in use
 #' @return writes a batch text file in batch_path
 #'
-#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 #'
 #' @export
 mac_emegs_batchfile_maker <- function(patterns,
@@ -318,7 +318,7 @@ mac_emegs_batchfile_maker <- function(patterns,
 #' @param include_file_name Logical argument for whether to put file name in output dataframe
 #' @return Returns a dataframe of the ERP data extracted from an AR file
 #'
-#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 #'
 #' @export
 read_ar_file <- function(path_to_ar = NULL,
@@ -499,7 +499,7 @@ read_ar_file <- function(path_to_ar = NULL,
 #' @param include_file_name Logical argument for whether to put file name in output dataframe
 #' @return Returns a dataframe of the ERP data extracted from AR files
 #'
-#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 #'
 #' @export
 read_ar_files <- function(data_folders = NULL,
@@ -675,7 +675,7 @@ read_ar_files <- function(data_folders = NULL,
 #' @param delete_trigger_numbers numeric vector of which triggers should be removed
 #' from marker file
 #'
-#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 #'
 #' @export
 marker_file_editor <- function(folders = NULL,
@@ -775,7 +775,7 @@ marker_file_editor <- function(folders = NULL,
 #'
 #' @param folders select at least one or more data folders to search for marker files
 #'
-#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 #'
 #' @export
 get_original_markers <- function(folders = NULL) {
@@ -805,23 +805,150 @@ get_original_markers <- function(folders = NULL) {
     file.copy(path_to_original_marker_file,
               current_file_path,
               overwrite = T)
+  }
+}
 
+#' Turns radians into degrees
+#'
+#' Simple function that turns radians to degrees.
+#'
+#' @param radians the radians number to be turned to degrees
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
+#'
+#' @export
+rad2deg <- function(radians) {(radians * 180) / (pi)}
+
+
+#' Turns degrees into radians
+#'
+#' Simple function that turns degrees to radians.
+#'
+#' @param degrees the degrees number to be turned to degrees
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
+#'
+#' @export
+deg2rad <- function(degrees) {(degrees * pi) / (180)}
+
+#' Finds theta in radians with a Z coordinate
+#'
+#' Takes cartesian Z coordinate and returns theta angles in radians which is 0
+#' at Cz which is a Z coordinate of 1
+#'
+#'
+#' @param z_coor z coordinate between -1 and 1
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
+#'
+#' @export
+cart2theta_radians <- function(z_coor) {
+
+  if ((-1 > z_coor | z_coor > 1)) {
+    stop("z_coor needs to be between -1 to 1")
+  }
+
+  theta_radians <- acos(z_coor)
+
+  names(theta_radians) <- "theta_radians"
+
+  theta_radians
+}
+
+#' Finds theta in degrees with a Z coordinate
+#'
+#' Takes cartesian Z coordinate and returns theta angles in degrees which is 0
+#' at Cz which is a Z coordinate of 1
+#'
+#'
+#' @param z_coor z coordinate between -1 and 1
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
+#'
+#' @export
+cart2theta_degrees <- function(z_coor){
+
+  theta_radians <- cart2theta_radians(z_coor)
+
+  theta_degrees <- rad2deg(theta_radians)
+
+  names(theta_degrees) <- "theta_degrees"
+
+  theta_degrees
+}
+
+cart2phi_radians
+
+phi_radians   <- atan2(y_coor, -x_coor)
+
+if (phi_radians < 0) {
+
+  phi_radians <- abs((2*pi) + phi_radians)
+
+}
+
+cart2phi_degrees
+
+cart_coor_check <- function(x_coor, y_coor, z_coor) {
+
+  if (-1 > x_coor | -1 > y_coor | -1 >  z_coor) {
+    stop("each coordinate has to be within -1 and 1")
+  }
+
+  if (1 < x_coor | 1 < y_coor | 1 <  z_coor) {
+    stop("each coordinate has to be within -1 and 1")
+  }
+
+  if (((x_coor^2) + (y_coor^2) + (z_coor^2)) > 1) {
+    stop("cartesian coordinate is outside of a sphere with a radius of 1")
+  }
+
+  if (((x_coor^2) + (y_coor^2) + (z_coor^2)) < .95) {
+    warning("cartesian coordinate is likely not on the sphere")
   }
 
 }
 
-#' Turns Cartesian coordinates into EMEGS EPosSphere positions
+#' Turns Cartesian coordinates into polar coordinates
 #'
-#' This function takes Cartesian coordinates and turns them into EPosSphere positions.
-#' Finding these positions are necessary for creating ecfg configuration files for EMEGS
-#' such that the software knows its three dimensional location on a sphere.
+#' This function takes Cartesian coordinates and turns them into polar/geographic
+#' coordinates. Finding these positions are necessary for creating ecfg configuration files for EMEGS
+#' such that the software knows its three dimensional location on a sphere. Assumes
+#' radius of one, X is right ear (negative) to left ear (positive), Y positive toward nose
+#' , and Z is 1 at Cz. Spherical coordinates are returned in radians and degrees. Theta is 0 at Cz
+#' pi at other pole. Phi is zero at right ear, pi/2 (90°) at nose, pi (180°) at left ear, 3/2*pi (270°) at
+#' Oz.
 #'
-#' @param folders select at least one or more data folders to search for marker files
+#' @param x_coor x coordinate between -1 and 1
+#' @param y_coor y coordinate between -1 and 1
+#' @param z_coor z coordinate between -1 and 1
+#' @return Returns a named vector with theta and phi in degrees and radians
 #'
-#' @author Andrew H Farkas, \email{andrewhfarkas@gmail.com}
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
 #'
 #' @export
+cart2polar <- function(x_coor, y_coor, z_coor) {
 
-name <- function(variables) {
+  cart_coor_check(x_coor, y_coor, z_coor)
 
+  theta_radians <- cart2theta_radians(z_coor)
+  theta_degrees <- rad2deg(theta_radians)
+
+  phi_radians   <- atan2(y_coor, -x_coor)
+
+  if (phi_radians < 0) {
+
+    phi_radians <- abs((2*pi) + phi_radians)
+
+  }
+
+  phi_degrees <- rad2deg(phi_radians)
+
+  polar_coor_vec        <- c( theta_radians,   theta_degrees,
+                              phi_radians,     phi_degrees)
+
+  names(polar_coor_vec) <- c("theta_radians", "theta_degrees",
+                             "phi_radians",   "phi_degrees")
+
+  polar_coor_vec
 }
