@@ -650,19 +650,75 @@ read_ar_files <- function(data_folders = NULL,
 
 }
 
-# make this data and save it in package in R/data.R
-#' Channel names and numbers for the biosemi 64 channel cap
+#' Channel information for the 64 sensor Biosemi cap
 #'
-#' This small data frame can help to show the name for each channel number.
+#' This data frame shows the channel names in order as well as each channels
+#' Cartesian and Spherical coordinates. You may notice that the channels are
+#' slightly lower than the 128 channels or the Oostenveld channels. This is
+#' because this is the way the Biosemi the company and an older version of
+#' EMEGS thought the channels were located. It is a small difference, but we
+#' leaving the older channel positions for this cap such that it is consistent
+#' with our already published studies. Cartesian coordinates assume a radius of
+#' 1.
 #'
-#' @format A data frame with 65 rows and 3 variables:
+#' @format A data frame with 64 rows and 9 variables:
 #' \describe{
 #'   \item{channel_number}{channel number used in EMEGS and read from AR file}
 #'   \item{channel_name}{actual channel name}
-#'   \item{channel_name_uppercase}{channel name but all letters are uppercase}
+#'   \item{channel_name_uppercase}{channel name but all letters are uppercase which can be useful for matching channels as researchers are not always consistent}
+#'   \item{X}{channel X coordinate with negative values toward the right ear}
+#'   \item{Y}{channel Y coordinate with positive values toward the nose}
+#'   \item{Z}{channel Z coordinate with 1 at Cz}
+#'   \item{EPosSphere_theta}{angle in radians from Cz north pole to south pole with Cz being 0}
+#'   \item{EPosSphere_phi}{angle in radians from right ear (0) toward nose then left ear continuing until back at right ear}
 #'   ...
 #' }
-"biosemi64_channel_numbers_names"
+"biosemi64_channel_info"
+
+#' Channel information for the 128 sensor Biosemi cap
+#'
+#' This data frame details the channels and their positions for the 128 channel
+#' Biosemi cap. These positions are inline with the Oostenveld positions taken
+#' from sphere 1 of his blog (https://robertoostenveld.nl/electrode/#aes1994).
+#' These positions are slightly different than the 64 Biosemi channel cap with
+#' each position being slightly closer together.
+#'
+#' @format A data frame with 128 rows and 9 variables:
+#' \describe{
+#'   \item{actiview}{the order in which actiview see the channels}
+#'   \item{wired}{the wire connected to each channel}
+#'   \item{channel_name}{actual channel name}
+#'   \item{channel_name_uppercase}{channel name but all letters are uppercase which can be useful for matching channels as researchers are not always consistent}
+#'   \item{X}{channel X coordinate with negative values toward the right ear}
+#'   \item{Y}{channel Y coordinate with positive values toward the nose}
+#'   \item{Z}{channel Z coordinate with 1 at Cz}
+#'   \item{EPosSphere_theta}{angle in radians from Cz north pole to south pole with Cz being 0}
+#'   \item{EPosSphere_phi}{angle in radians from right ear (0) toward nose then left ear continuing until back at right ear}
+#'   ...
+#' }
+"biosemi128_channel_info"
+
+#' Channel information for all positions courtesy of Oostenveld's blog
+#'
+#' This data frame details the channels and their positions for the positions
+#' outlined by Dr. Oostenveld. These positions where taken from Oostenveld's
+#' sphere 1 off of his blog (https://robertoostenveld.nl/electrode/#aes1994).
+#' These positions are slightly different than the 64 Biosemi channel cap with
+#' each position being slightly closer together. This was used to find the
+#' positions for the 128 biosemi cap
+#'
+#' @format A data frame with 128 rows and 7 variables:
+#' \describe{
+#'   \item{channel_name}{actual channel name}
+#'   \item{channel_name_uppercase}{channel name but all letters are uppercase which can be useful for matching channels as researchers are not always consistent}
+#'   \item{X}{channel X coordinate with negative values toward the right ear}
+#'   \item{Y}{channel Y coordinate with positive values toward the nose}
+#'   \item{Z}{channel Z coordinate with 1 at Cz}
+#'   \item{EPosSphere_theta}{angle in radians from Cz north pole to south pole with Cz being 0}
+#'   \item{EPosSphere_phi}{angle in radians from right ear (0) toward nose then left ear continuing until back at right ear}
+#'   ...
+#' }
+"Oostenveld_channel_info"
 
 
 #' Make changes to ctf MEG marker file and save the original
