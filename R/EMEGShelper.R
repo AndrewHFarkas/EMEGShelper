@@ -520,6 +520,9 @@ read_ar_files <- function(data_folders = NULL,
   if (is.null(data_folders)) {
     stop("must give at least one path to a data folder")
   }
+  if (is.null(patterns)) {
+    stop("must give at least one patterns argument to search for files (ex: 'ar')")
+  }
 
   multiple_ar_files_df <- data.frame()
 
