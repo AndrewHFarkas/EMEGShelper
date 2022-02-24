@@ -1080,3 +1080,21 @@ polar2cart <- function(theta_radians, phi_radians) {
 
   cart_coors
 }
+
+
+#' Finds the standard error
+#'
+#' A simple function to find standard error. There is different defintions of
+#' standard error so beware
+#'
+#' @param vec a vector of numerical values
+#' @param na.rm a logical argument to remove NA values before calculating the
+#' standard error
+#' @return Returns a numeric standard error value
+#'
+#' @author Andrew H Farkas, \email{andrewhfarkas at g mail dot com}
+#'
+#' @export
+se <- function(vec, na.rm = FALSE) {
+  sd(vec, na.rm)/sqrt(n())
+}
