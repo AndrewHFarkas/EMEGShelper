@@ -413,7 +413,7 @@ read_ar_file <- function(path_to_ar = NULL,
 
   if(average_timepoints){
 
-    avg_mat <- rowMeans(avg_mat)
+    avg_mat <- data.frame("averaged_time_points" = rowMeans(avg_mat))
 
   }
 
