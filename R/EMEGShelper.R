@@ -524,7 +524,6 @@ read_ar_files <- function(data_folders = NULL,
     stop("must give at least one patterns argument to search for files (ex: 'ar')")
   }
 
-  multiple_ar_files_df <- data.frame()
 
   file_paths <- character()
 
@@ -627,8 +626,58 @@ read_ar_files <- function(data_folders = NULL,
     }
   }
 
+  example_data_table <- data.table::data.table(
+    read_ar_file(path_to_ar = file_paths[1]))
+
+  number_of_channels <- nrow(example_data_table)
+
+  number_of_data_points <- ncol(example_data_table)
 
   number_of_paths <- length(file_paths)
+
+  number_of_total_rows <- number_of_paths*number_of_channels
+
+  # Create a list of empty numeric vectors
+  data_point_columns_empty <- lapply(1:number_of_data_points,
+                          function(x) vector(mode = "numeric",
+                                             length = number_of_total_rows))
+
+  # Name the elements of the list V1 to end
+  names(data_point_columns_empty) <- paste0("V", 1:number_of_data_points)
+
+  next_example_data_table <- data.table::data.table(
+    read_ar_file(path_to_ar = file_paths[1],
+                 extract_channels = extract_channels,
+                 baseline_pts = baseline_pts,
+                 select_time_points = select_time_points,
+                 average_timepoints = average_timepoints,
+                 average_channels = average_channels,
+                 include_channel_name = include_channel_name,
+                 include_path_name = include_path_name,
+                 include_file_name = include_file_name))
+
+  information_columns_to_add <-
+    next_example_data_table[,1:(ncol(next_example_data_table)-number_of_data_points)]
+
+  info_col_names <- colnames(information_columns_to_add)
+  info_col_types <- sapply(information_columns_to_add, class)
+
+  info_vectors_list_empty <- list()
+
+  for (i in seq_along(info_col_names)) {
+    # Create an empty vector of the same data type
+    empty_vector <- vector(mode = info_col_types[i], length = number_of_total_rows)
+
+    # Assign the empty vector to the list and name it based on the column name
+    info_vectors_list_empty[[info_col_names[i]]] <- empty_vector
+  }
+
+
+  multiple_ar_files <- data.table::setDT(c(info_vectors_list_empty,
+                                         data_point_columns_empty))
+
+  start_row_index <- 1
+  end_row_index <- number_of_channels
 
   for (path_index in 1:number_of_paths) {
 
@@ -645,11 +694,17 @@ read_ar_files <- function(data_folders = NULL,
                                include_file_name = include_file_name)
 
 
-    multiple_ar_files_df <- rbind.data.frame(multiple_ar_files_df, current_df)
+    multiple_ar_files <- data.table::set(multiple_ar_files,
+                             i = start_row_index:end_row_index,
+                             j = c(1:length(current_df)),
+                             current_df)
+
+    start_row_index <- start_row_index + number_of_channels
+    end_row_index <- end_row_index + number_of_channels
 
   }
 
-  multiple_ar_files_df
+  data.frame(multiple_ar_files)
 
 }
 
