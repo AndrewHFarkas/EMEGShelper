@@ -626,8 +626,13 @@ read_ar_files <- function(data_folders = NULL,
     }
   }
 
+  # read one ar file to know the dimensions of each file
   example_data_table <- data.table::data.table(
-    read_ar_file(path_to_ar = file_paths[1]))
+    read_ar_file(path_to_ar = file_paths[1],
+                 extract_channels = extract_channels,
+                 select_time_points = select_time_points,
+                 average_timepoints = average_timepoints,
+                 average_channels = average_channels))
 
   number_of_channels <- nrow(example_data_table)
 
