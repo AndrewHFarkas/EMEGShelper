@@ -375,7 +375,7 @@ read_ar_files <- function(data_folders = NULL,
     info_vectors_list_empty[[info_col_names[i]]] <- empty_vector
   }
 
-
+  browser()
   multiple_ar_files <- data.table::setDT(c(info_vectors_list_empty,
                                          data_point_columns_empty))
 
