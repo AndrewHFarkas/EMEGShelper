@@ -360,7 +360,8 @@ read_ar_files <- function(data_folders = NULL,
                  include_file_name = include_file_name))
 
   information_columns_to_add <-
-    next_example_data_table[,1:(ncol(next_example_data_table)-number_of_data_points)]
+    next_example_data_table[,1:(ncol(next_example_data_table)-number_of_data_points),
+                            drop = F] # prevents the column name disappearing
 
   info_col_names <- colnames(information_columns_to_add)
   info_col_types <- sapply(information_columns_to_add, class)
@@ -395,7 +396,6 @@ read_ar_files <- function(data_folders = NULL,
                                include_path_name = include_path_name,
                                include_file_name = include_file_name)
 
-    browser()
     multiple_ar_files <- data.table::set(multiple_ar_files,
                              i = start_row_index:end_row_index,
                              j = c(1:length(current_df)),
