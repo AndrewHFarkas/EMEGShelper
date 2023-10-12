@@ -1,4 +1,6 @@
-
+#' @import reticulate
+#' @import data.table
+NULL
 #' Read ERP data from one AR file
 #'
 #' This function reads data from one AR file that come from EMEGS.
